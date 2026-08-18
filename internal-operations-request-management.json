@@ -1,0 +1,1448 @@
+{
+  "name": "Internal Operations Request Management - Clean Template",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "operations-request",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "be86ecb7-1d17-47df-b03b-3536a3188155",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b9900551-4dc7-41ee-939b-8e9eb2cebf2d",
+              "name": "=request_id",
+              "value": "=REQ-{{$now.toFormat('yyyyMMdd-HHmmss')}}",
+              "type": "string"
+            },
+            {
+              "id": "3e3faf52-cfa4-4c0b-9932-fc63e53276da",
+              "name": "employee_name",
+              "value": "={{ $json.body.employee_name }}",
+              "type": "string"
+            },
+            {
+              "id": "37331dce-bf1c-41f9-a278-07c0d09fa3df",
+              "name": "department",
+              "value": "={{ $json.body.department }}",
+              "type": "string"
+            },
+            {
+              "id": "629190cf-bc5d-460c-bbcc-8c9274aa01ad",
+              "name": "request_type",
+              "value": "={{ $json.body.request_type }}",
+              "type": "string"
+            },
+            {
+              "id": "fc55ca47-ce40-4ee8-b25d-9257a12e7311",
+              "name": "description",
+              "value": "={{ $json.body.description }}",
+              "type": "string"
+            },
+            {
+              "id": "6dfd5642-9aea-4c8e-9d3a-be18b2cbac9b",
+              "name": "amount",
+              "value": "={{ $json.body.amount }}",
+              "type": "number"
+            },
+            {
+              "id": "c87bbb7b-32fb-4a5f-8dd0-c02b405db167",
+              "name": "status",
+              "value": "pending",
+              "type": "string"
+            },
+            {
+              "id": "b85f1642-1f94-4ecd-88b3-57621d9e92f9",
+              "name": "created_at",
+              "value": "={{$now.toISO()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0988d510-52e6-473a-b938-c4b97e362992",
+      "name": "Normalize Request"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.amount }}",
+                    "rightValue": 5000000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    },
+                    "id": "e9b260a2-1d33-4c52-a365-c711d824f480"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Auto Approval"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e8399157-5cfb-4e91-b801-09fcaa7582a8",
+                    "leftValue": "={{ $json.amount > 5000000 && $json.amount <= 20000000 }}",
+                    "rightValue": 5000000,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Manager Approval"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e15095b2-4eb9-4e29-88b9-51fe65f048e1",
+                    "leftValue": "={{ $json.amount }}",
+                    "rightValue": 20000000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Director Approval"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -16
+      ],
+      "id": "6aa53061-4417-4704-8150-6c6691a101c0",
+      "name": "Determine Approval Level"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9106af28-48de-49c4-85e4-d23f32d3be1b",
+              "name": "approval_level",
+              "value": "Auto",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        624,
+        -192
+      ],
+      "id": "d265c314-9d38-4ea3-9a74-5a8627aac471",
+      "name": "Set Auto Approval"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7b903e76-3e33-4182-86c2-a070611dfd8e",
+              "name": "approval_level",
+              "value": "Manager",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        624,
+        0
+      ],
+      "id": "4a3a7d26-ed96-4b4a-b055-5a6e1a21fac7",
+      "name": "Set Manager Approval"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "307d5d58-f163-4adb-a448-c0fa3304c7ad",
+              "name": "approval_level",
+              "value": "Director",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        624,
+        208
+      ],
+      "id": "cc090335-61cd-43b7-be0e-dbac7aec7a38",
+      "name": "Set Director Approval"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        848,
+        -16
+      ],
+      "id": "9bf654fb-97ab-4515-b036-03a3a4e2d7d1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        0
+      ],
+      "id": "7b9d2472-4a4c-4b25-9f23-f1b367dc6eea",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "=approve",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "74eecd98-a415-464f-ac9b-3d2f307e1cbc"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Approved"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "517aa0b4-7603-42af-beb8-a060806086a1",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "reject",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2064,
+        0
+      ],
+      "id": "6315418c-f815-4474-bbff-72b9a3bc5fd1",
+      "name": "Process Approval Decision"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9b48c6a8-4cd2-4acd-945a-58406d73c9ff",
+              "name": "decision",
+              "value": "={{ $json.query.decision }}",
+              "type": "string"
+            },
+            {
+              "id": "5f4a8cc6-bef7-4015-8e11-89011396db27",
+              "name": "request_id",
+              "value": "={{ $('Normalize Request').item.json.request_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1888,
+        0
+      ],
+      "id": "e84e46a4-df59-4731-99c4-91e2e429bfcb",
+      "name": "Normalize Approval Response"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Internal Operations Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "request_id": "={{ $json.request_id }}",
+            "employee_name": "={{ $json.employee_name }}",
+            "department": "={{ $json.department }}",
+            "request_type": "={{ $json.request_type }}",
+            "description": "={{ $json.description }}",
+            "amount": "={{ $json.amount }}",
+            "approval_level": "={{ $json.approval_level }}",
+            "created_at": "={{ $json.created_at }}",
+            "status": "Pending",
+            "decision": "Pending"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "request_id",
+              "displayName": "request_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employee_name",
+              "displayName": "employee_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "department",
+              "displayName": "department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "request_type",
+              "displayName": "request_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approval_level",
+              "displayName": "approval_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "b9be1381-cb71-4056-af0b-c9898df26b7f",
+      "name": "Save Request"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.approval_level }}",
+                    "rightValue": "Auto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "eeb40bea-7d14-4f83-ba41-e2278109cf35"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Auto Approve"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e0408231-4768-4730-aae6-7810812aac97",
+                    "leftValue": "={{ $json.approval_level }}",
+                    "rightValue": "Manager",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Manager"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bc29baf9-f22e-4e77-98c0-6b9edb4ce3d6",
+                    "leftValue": "={{ $json.approval_level }}",
+                    "rightValue": "Director",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Director"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        -16
+      ],
+      "id": "6d7b4584-e055-4e70-85f3-ee95f45aa7d9",
+      "name": "Check Approval Required"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "82a835a5-955c-491f-bb50-d382a65b4c4e",
+              "name": "status",
+              "value": "Approved",
+              "type": "string"
+            },
+            {
+              "id": "03e4c88e-23c3-4a5a-8d76-cfc67d83cf35",
+              "name": "decision",
+              "value": "Auto Approved",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1456,
+        -224
+      ],
+      "id": "f23b3297-abd9-4334-84f5-f17426bb870c",
+      "name": "Set Auto Approved"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Internal Operations Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "request_id",
+              "lookupValue": "={{ $('Normalize Approval Response').item.json.request_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2240,
+        -96
+      ],
+      "id": "98a3b615-1840-46c4-bf22-30e4838a396f",
+      "name": "Filter Request ID"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Internal Operations Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "status": "Approved",
+            "decision": "approve"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "request_id",
+              "displayName": "request_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employee_name",
+              "displayName": "employee_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "department",
+              "displayName": "department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "request_type",
+              "displayName": "request_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approval_level",
+              "displayName": "approval_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2400,
+        -96
+      ],
+      "id": "484255bf-b082-4c7e-8c1a-e03531292254",
+      "name": "Approved Update"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Internal Operations Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "request_id",
+              "lookupValue": "={{ $('Normalize Approval Response').item.json.request_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2240,
+        112
+      ],
+      "id": "e78ae038-8859-4e00-919f-53aa7893b4a3",
+      "name": "Filter request ID"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Internal Operations Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "status": "Rejected",
+            "decision": "reject"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "request_id",
+              "displayName": "request_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employee_name",
+              "displayName": "employee_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "department",
+              "displayName": "department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "request_type",
+              "displayName": "request_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approval_level",
+              "displayName": "approval_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2400,
+        112
+      ],
+      "id": "84c4dcaf-8d1d-429f-82d9-14434d24f8b7",
+      "name": "Rejected Update"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Internal Operations Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "request_id",
+              "lookupValue": "={{ $json.request_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        -224
+      ],
+      "id": "40faca50-118b-48ce-ac9b-235f216d9c16",
+      "name": "Filter Requested ID"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Internal Operations Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REPLACE_WITH_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "status": "Approved",
+            "decision": "={{ $('Set Auto Approved').item.json.decision }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "request_id",
+              "displayName": "request_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employee_name",
+              "displayName": "employee_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "department",
+              "displayName": "department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "request_type",
+              "displayName": "request_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approval_level",
+              "displayName": "approval_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1840,
+        -224
+      ],
+      "id": "25135b3a-82c2-4aa7-8502-94e6a563e083",
+      "name": "Auto Approved Update"
+    },
+    {
+      "parameters": {
+        "sendTo": "approver@example.com",
+        "subject": "=[Approval Required] {{$json.request_id}} - {{$json.request_type}}",
+        "message": "=<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;color:#333;background:#ffffff;\">\n\n  <!-- Header -->\n  <div style=\"background:#1f2937;padding:24px 28px;border-radius:8px 8px 0 0;\">\n    <div style=\"color:#ffffff;font-size:22px;font-weight:bold;\">\n      Approval Required\n    </div>\n    <div style=\"color:#d1d5db;font-size:13px;margin-top:6px;\">\n      Internal Operations Request Management\n    </div>\n  </div>\n\n  <!-- Introduction -->\n  <div style=\"padding:24px 28px 10px 28px;\">\n    <p style=\"font-size:15px;line-height:1.6;margin:0;\">\n      Hello,\n    </p>\n\n    <p style=\"font-size:15px;line-height:1.6;margin:12px 0 0 0;\">\n      A new internal operations request requires your approval.\n      Please review the information below and select an action.\n    </p>\n  </div>\n\n  <!-- Request Information -->\n  <div style=\"padding:10px 28px 20px 28px;\">\n\n    <div style=\"font-size:16px;font-weight:bold;margin-bottom:12px;\">\n      Request Information\n    </div>\n\n    <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"\n           style=\"border:1px solid #e5e7eb;border-radius:6px;border-collapse:separate;overflow:hidden;\">\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;width:38%;border-bottom:1px solid #e5e7eb;\">\n          <strong>Request ID</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.request_id}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Employee</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.employee_name}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Department</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.department}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Request Type</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.request_type}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Approval Level</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.approval_level}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Amount</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.amount}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;\">\n          <strong>Submitted At</strong>\n        </td>\n        <td style=\"padding:10px 14px;\">\n          {{$json.created_at}}\n        </td>\n      </tr>\n\n    </table>\n  </div>\n\n  <!-- Description -->\n  <div style=\"padding:0 28px 24px 28px;\">\n\n    <div style=\"font-size:16px;font-weight:bold;margin-bottom:10px;\">\n      Request Description\n    </div>\n\n    <div style=\"background:#f9fafb;border-left:4px solid #6b7280;padding:14px 16px;border-radius:4px;font-size:14px;line-height:1.6;\">\n      {{$json.description}}\n    </div>\n\n  </div>\n\n  <!-- Approval Action -->\n  <div style=\"padding:20px 28px 28px 28px;border-top:1px solid #e5e7eb;text-align:center;\">\n\n    <div style=\"font-size:16px;font-weight:bold;margin-bottom:8px;\">\n      Approval Decision\n    </div>\n\n    <div style=\"font-size:13px;color:#6b7280;margin-bottom:18px;\">\n      Please select one of the options below.\n    </div>\n\n    <a href=\"{{$execution.resumeUrl}}&decision=approve\"\n       style=\"background:#16a34a;\n              color:#ffffff;\n              padding:12px 28px;\n              text-decoration:none;\n              border-radius:6px;\n              display:inline-block;\n              font-weight:bold;\n              font-size:14px;\">\n      ✓ &nbsp; APPROVE\n    </a>\n\n    &nbsp;&nbsp;&nbsp;\n\n    <a href=\"{{$execution.resumeUrl}}&decision=reject\"\n       style=\"background:#dc2626;\n              color:#ffffff;\n              padding:12px 28px;\n              text-decoration:none;\n              border-radius:6px;\n              display:inline-block;\n              font-weight:bold;\n              font-size:14px;\">\n      ✕ &nbsp; REJECT\n    </a>\n\n  </div>\n\n  <!-- Footer -->\n  <div style=\"background:#f9fafb;padding:16px 28px;border-radius:0 0 8px 8px;text-align:center;\">\n\n    <div style=\"font-size:12px;color:#6b7280;\">\n      This is an automated notification from the\n      <strong>Internal Operations Request Management System</strong>.\n    </div>\n\n    <div style=\"font-size:11px;color:#9ca3af;margin-top:5px;\">\n      Please do not reply directly to this email.\n    </div>\n\n  </div>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        0
+      ],
+      "id": "6c5308d6-5c29-4d72-b4de-30785cb64dda",
+      "name": "Send a message"
+    },
+    {
+      "parameters": {
+        "sendTo": "approver@example.com",
+        "subject": "=[Approval Required] {{$json.request_id}} - {{$json.request_type}}",
+        "message": "=<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;color:#333;background:#ffffff;\">\n\n  <!-- Header -->\n  <div style=\"background:#1f2937;padding:24px 28px;border-radius:8px 8px 0 0;\">\n    <div style=\"color:#ffffff;font-size:22px;font-weight:bold;\">\n      Approval Required\n    </div>\n    <div style=\"color:#d1d5db;font-size:13px;margin-top:6px;\">\n      Internal Operations Request Management\n    </div>\n  </div>\n\n  <!-- Introduction -->\n  <div style=\"padding:24px 28px 10px 28px;\">\n    <p style=\"font-size:15px;line-height:1.6;margin:0;\">\n      Hello,\n    </p>\n\n    <p style=\"font-size:15px;line-height:1.6;margin:12px 0 0 0;\">\n      A new internal operations request requires your approval.\n      Please review the information below and select an action.\n    </p>\n  </div>\n\n  <!-- Request Information -->\n  <div style=\"padding:10px 28px 20px 28px;\">\n\n    <div style=\"font-size:16px;font-weight:bold;margin-bottom:12px;\">\n      Request Information\n    </div>\n\n    <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"\n           style=\"border:1px solid #e5e7eb;border-radius:6px;border-collapse:separate;overflow:hidden;\">\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;width:38%;border-bottom:1px solid #e5e7eb;\">\n          <strong>Request ID</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.request_id}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Employee</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.employee_name}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Department</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.department}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Request Type</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.request_type}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Approval Level</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.approval_level}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;\">\n          <strong>Amount</strong>\n        </td>\n        <td style=\"padding:10px 14px;border-bottom:1px solid #e5e7eb;\">\n          {{$json.amount}}\n        </td>\n      </tr>\n\n      <tr>\n        <td style=\"padding:10px 14px;background:#f9fafb;\">\n          <strong>Submitted At</strong>\n        </td>\n        <td style=\"padding:10px 14px;\">\n          {{$json.created_at}}\n        </td>\n      </tr>\n\n    </table>\n  </div>\n\n  <!-- Description -->\n  <div style=\"padding:0 28px 24px 28px;\">\n\n    <div style=\"font-size:16px;font-weight:bold;margin-bottom:10px;\">\n      Request Description\n    </div>\n\n    <div style=\"background:#f9fafb;border-left:4px solid #6b7280;padding:14px 16px;border-radius:4px;font-size:14px;line-height:1.6;\">\n      {{$json.description}}\n    </div>\n\n  </div>\n\n  <!-- Approval Action -->\n  <div style=\"padding:20px 28px 28px 28px;border-top:1px solid #e5e7eb;text-align:center;\">\n\n    <div style=\"font-size:16px;font-weight:bold;margin-bottom:8px;\">\n      Approval Decision\n    </div>\n\n    <div style=\"font-size:13px;color:#6b7280;margin-bottom:18px;\">\n      Please select one of the options below.\n    </div>\n\n    <a href=\"{{$execution.resumeUrl}}&decision=approve\"\n       style=\"background:#16a34a;\n              color:#ffffff;\n              padding:12px 28px;\n              text-decoration:none;\n              border-radius:6px;\n              display:inline-block;\n              font-weight:bold;\n              font-size:14px;\">\n      ✓ &nbsp; APPROVE\n    </a>\n\n    &nbsp;&nbsp;&nbsp;\n\n    <a href=\"{{$execution.resumeUrl}}&decision=reject\"\n       style=\"background:#dc2626;\n              color:#ffffff;\n              padding:12px 28px;\n              text-decoration:none;\n              border-radius:6px;\n              display:inline-block;\n              font-weight:bold;\n              font-size:14px;\">\n      ✕ &nbsp; REJECT\n    </a>\n\n  </div>\n\n  <!-- Footer -->\n  <div style=\"background:#f9fafb;padding:16px 28px;border-radius:0 0 8px 8px;text-align:center;\">\n\n    <div style=\"font-size:12px;color:#6b7280;\">\n      This is an automated notification from the\n      <strong>Internal Operations Request Management System</strong>.\n    </div>\n\n    <div style=\"font-size:11px;color:#9ca3af;margin-top:5px;\">\n      Please do not reply directly to this email.\n    </div>\n\n  </div>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        176
+      ],
+      "id": "a8bc5579-5a9d-445c-abcb-9b70e110aeac",
+      "name": "Send a message1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Determine Approval Level",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Approval Level": {
+      "main": [
+        [
+          {
+            "node": "Set Auto Approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Manager Approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Director Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Manager Approval": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Set Auto Approval": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Director Approval": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Save Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Normalize Approval Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Approval Response": {
+      "main": [
+        [
+          {
+            "node": "Process Approval Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Request": {
+      "main": [
+        [
+          {
+            "node": "Check Approval Required",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Approval Decision": {
+      "main": [
+        [
+          {
+            "node": "Filter Request ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter request ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Approval Required": {
+      "main": [
+        [
+          {
+            "node": "Set Auto Approved",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Auto Approved": {
+      "main": [
+        [
+          {
+            "node": "Filter Requested ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Request ID": {
+      "main": [
+        [
+          {
+            "node": "Approved Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter request ID": {
+      "main": [
+        [
+          {
+            "node": "Rejected Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Requested ID": {
+      "main": [
+        [
+          {
+            "node": "Auto Approved Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved Update": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {},
+  "nodeGroups": [],
+  "tags": []
+}
