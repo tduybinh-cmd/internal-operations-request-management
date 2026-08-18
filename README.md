@@ -31,6 +31,8 @@ The automation handles the repetitive process while leaving the actual approval 
 
 ## 🔄 Workflow Architecture
 
+![Workflow Overview](assets/workflow-overview.png)
+
 ```text
                     ┌──────────────────┐
                     │  Request Submit  │
@@ -145,8 +147,6 @@ Key design principles include:
 * **Reusable workflow design**
 
 ## 📁 Repository Structure
-
-![Workflow Overview](assets/workflow-overview.png)
 
 ```text
 internal-operations-request-management/
