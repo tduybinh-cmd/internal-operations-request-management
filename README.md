@@ -31,7 +31,7 @@ The automation handles the repetitive process while leaving the actual approval 
 
 ## 🔄 Workflow Architecture
 
-```text
+![Workflow Overview](assets/workflow-overview.png)
                     ┌──────────────────┐
                     │  Request Submit  │
                     └────────┬─────────┘
